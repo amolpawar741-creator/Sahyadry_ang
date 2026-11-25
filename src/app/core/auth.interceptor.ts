@@ -1,0 +1,10 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { catchError, throwError } from 'rxjs';
+import { Auth } from './auth.service';
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const auth = inject(Auth); const t = auth.token();
+  const r = t ? req.clone({ setHeaders: { Authorization: `Bearer ${t}` } }) : req;
+  return next(r).pipe(catchError(e => { if (e.status === 401 && !req.url.endsWith('/auth/login')) auth.logout(); return throwError(() => e); }));
+};
