@@ -2,5 +2,5 @@
 
 export const API_URL = {
   production: true,
-  apiUrl: '/api'
+  apiUrl: 'http://sahyadriapi.runasp.net'
 };
