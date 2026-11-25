@@ -1,1 +1,1 @@
-export const API_URL = 'https://localhost:50412/api';
+export const API_URL = 'http://sahyadrycrm1.runasp.net';
