@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { CurrencyPipe, DecimalPipe } from '@angular/common';
+import { CurrencyPipe } from '@angular/common';
 import { Api } from '../core/api.service';
 
 @Component({
-  selector: 'app-dashboard', standalone: true, imports: [CurrencyPipe, DecimalPipe],
+  selector: 'app-dashboard', standalone: true, imports: [CurrencyPipe],
   template: `
   <h1>Business overview</h1>
   @if (d(); as d) {
