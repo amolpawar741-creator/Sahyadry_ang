@@ -14,13 +14,13 @@ import { Api } from '../core/api.service';
     <div><label>Area (sq m)</label><input type="number" formControlName="areaSqm"></div>
     <div><label>MIDC rate / sq m</label><input type="number" formControlName="midcRate"></div>
     <div><label>Consultancy rate / sq m</label><input type="number" formControlName="consultancyRate"></div>
-    <div><label>GST %</label><input type="number" formControlName="gstPercent"></div>
+    <!-- <div><label>GST %</label><input type="number" formControlName="gstPercent"></div> -->
     <div><label>Advance received (₹)</label><input type="number" formControlName="advanceAmount"></div>
     <div><label>Valid until</label><input type="date" formControlName="validUntil"></div>
     <div class="full"><label>Payment terms</label><input formControlName="paymentTerms"></div></div>
     <div class="card" style="background:var(--blue-soft);margin:12px 0 0">
       MIDC plot value: <b>₹{{ calc().plot | number:'1.0-0' }}</b> · Consultancy fee: <b>₹{{ calc().fee | number:'1.0-0' }}</b> ·
-      GST: <b>₹{{ calc().gst | number:'1.0-0' }}</b> · Total payable: <b>₹{{ calc().total | number:'1.0-0' }}</b> ·
+      Total payable: <b>₹{{ calc().total | number:'1.0-0' }}</b> ·
       Balance: <b>₹{{ calc().balance | number:'1.0-0' }}</b></div>
     @if (error()) { <div class="err" role="alert">{{ error() }}</div> }
     <button class="btn" style="margin-top:12px" [disabled]="f.invalid">Create quotation</button></form>
@@ -36,8 +36,10 @@ import { Api } from '../core/api.service';
 export class QuotationsComponent implements OnInit {
   private api = inject(Api); private fb = inject(FormBuilder);
   customers = signal<any[]>([]); plots = signal<any[]>([]); rows = signal<any[]>([]); error = signal('');
-  f = this.fb.group({ customerId: [null as number | null, Validators.required], plotId: [null as number | null], areaSqm: [0, Validators.min(1)],
-    midcRate: [0], consultancyRate: [0], gstPercent: [18], advanceAmount: [0], validUntil: [''], paymentTerms: [''] });
+  f = this.fb.group({
+    customerId: [null as number | null, Validators.required], plotId: [null as number | null], areaSqm: [0, Validators.min(1)],
+    midcRate: [0], consultancyRate: [0], advanceAmount: [0], validUntil: [''], paymentTerms: ['']
+  });
   ngOnInit() {
     this.api.get<any>('customers', { pageSize: 100 }).subscribe(r => this.customers.set(r.items));
     this.api.get<any[]>('plots').subscribe(p => this.plots.set(p)); this.load();
@@ -46,13 +48,14 @@ export class QuotationsComponent implements OnInit {
   fillFromPlot() { const p = this.plots().find(x => x.id === this.f.value.plotId); if (p) this.f.patchValue({ areaSqm: p.areaSqm, midcRate: p.ratePerSqm }); }
   calc() {   // mirrors the server-side formulas (server is the source of truth)
     const v = this.f.getRawValue(); const area = +(v.areaSqm ?? 0);
-    const fee = area * +(v.consultancyRate ?? 0), gst = fee * +(v.gstPercent ?? 0) / 100, total = fee + gst;
-    return { plot: area * +(v.midcRate ?? 0), fee, gst, total, balance: total - +(v.advanceAmount ?? 0) };
+    const fee = area * +(v.consultancyRate ?? 0), total = fee ;
+    return { plot: area * +(v.midcRate ?? 0), fee, total, balance: total - +(v.advanceAmount ?? 0) };
   }
   create() {
     const v = this.f.getRawValue();
     this.api.post('quotations', { ...v, validUntil: v.validUntil || null }).subscribe({
-      next: () => { this.error.set(''); this.load(); }, error: e => this.error.set(e.error?.message ?? 'Could not create quotation.') });
+      next: () => { this.error.set(''); this.load(); }, error: e => this.error.set(e.error?.message ?? 'Could not create quotation.')
+    });
   }
   pdf(q: any) { this.api.download(`quotations/${q.id}/pdf`, `${q.quotationNo}.pdf`); }
   pay(q: any) {

@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth.guard';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login.component').then(m => m.LoginComponent) },
-  { path: '', canActivate: [authGuard], loadComponent: () => import('./layout/shell.component').then(m => m.ShellComponent),
+  {
+    path: '', canActivate: [authGuard], loadComponent: () => import('./layout/shell.component').then(m => m.ShellComponent),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard.component').then(m => m.DashboardComponent) },
@@ -14,6 +15,7 @@ export const routes: Routes = [
       { path: 'followups', loadComponent: () => import('./pages/followups.component').then(m => m.FollowUpsComponent) },
       { path: 'plots', loadComponent: () => import('./pages/plots.component').then(m => m.PlotsComponent) },
       { path: 'quotations', loadComponent: () => import('./pages/quotations.component').then(m => m.QuotationsComponent) },
-    ] },
+    ]
+  },
   { path: '**', redirectTo: '' }
 ];
